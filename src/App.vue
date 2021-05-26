@@ -46,7 +46,7 @@ export default {
       display_gif: undefined,
       search_string: "",
       random: true,
-      baseURL: "http://api.giphy.com/v1/gifs/",
+      baseURL: "https://api.giphy.com/v1/gifs/",
       giphyURL: "",
       keys: [],
       stored_gifs: [],
