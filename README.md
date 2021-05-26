@@ -25,5 +25,9 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
 
 
 ### To Dos
-Style style style
 On click of copy to clipboard, gif url copied
+Change format to be a single gif shown with ability to cycle through display_gifs?
+Make sure encodeURL is solid
+Remove all unecessary code
+Change ability to copy link to something more nicely formatted
+Fix test classname thing
