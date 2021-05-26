@@ -54,7 +54,7 @@ export default {
       loading: false,
       debounce: null,
       too_many_requests: false,
-      error_message: 'This is a test error message which is a test',
+      error_message: '',
       index: 0
     }
   },
