@@ -18,25 +18,25 @@
     </div>
   </div>
   <div class="gif_parent_container">
-  <div class="gif_container">
-    <div class="loader" v-if="loading">
-      <p>Loading...</p>
+    <div v-if="!this.hide_gif_container" class="gif_container">
+      <div class="loader" v-if="loading">
+        <p>Loading...</p>
+      </div>
+      <div v-else-if="this.display_gif">
+        <div class="cycle_container">
+          <button @click="this.index > 0 ? cycle('-') : null">Previous</button>
+          <button @click="this.index + 1 < this.displayed_gifs.length ? cycle('+') : null">Next</button>
+        </div>
+        <div>
+          <video width="320" height="240" autoplay muted loop :key="this.display_gif">
+            <source :src="this.display_gif.images.original_mp4.mp4" type="video/mp4">
+          </video>
+        </div>
+        <div class="copy_to_clipboard_container">
+        <button @click="this.copyToClipboard">Copy To Clipboard</button>
+        </div>
+      </div>
     </div>
-    <div v-else-if="this.display_gif">
-      <div class="cycle_container">
-        <button @click="this.index > 0 ? cycle('-') : null">Previous</button>
-        <button @click="this.index + 1 < this.displayed_gifs.length ? cycle('+') : null">Next</button>
-      </div>
-      <div>
-        <video width="320" height="240" autoplay muted loop :key="this.display_gif">
-          <source :src="this.display_gif.images.original_mp4.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="copy_to_clipboard_container">
-      <button @click="this.copyToClipboard">Copy To Clipboard</button>
-      </div>
-    </div>
-  </div>
   </div>
   <div class="footer_container">
   <div class="footer">
@@ -64,9 +64,10 @@ export default {
       loading: false,
       debounce: null,
       too_many_requests: false,
-      error_message: '',
+      error_message: "",
       index: 0,
-      show_copied_message: false
+      show_copied_message: false,
+      hide_gif_container: false
     }
   },
   mounted: function() {
@@ -83,6 +84,7 @@ export default {
     },
     display_gif: function () {
       this.show_copied_message = false
+      this.error_message = ""
     }
   },
   methods: {
@@ -93,10 +95,7 @@ export default {
       if (this.random) {
         this.giphyURL = encodeURI(this.baseURL + "random?api_key=" + this.giphy_api_key + "&limit=5")
       } else {
-
-        let formatted_string = this.search_string.replace(/[^\w\s/d+1/]/gi, '')
-        formatted_string = this.search_string.split(' ').join('+')
-
+        let formatted_string = this.search_string.split(' ').join('+')
         this.giphyURL = encodeURI(this.baseURL + "search?q="+formatted_string+"&api_key="+this.giphy_api_key+"&limit=5")
       }      
     },
@@ -109,6 +108,7 @@ export default {
     },
     getGifs: function () {
       this.show_copied_message = false
+      this.hide_gif_container = false
       this.loading = true
       this.formatSearch()
       if (this.random) {
@@ -116,19 +116,26 @@ export default {
       } else {
         axios.get(this.giphyURL)
         .then((response) => {
-          if (response.data.meta.status === 200) {
-            this.displayed_gifs = []
-            for (let i = 0; i < response.data.data.length; i++) {
-              this.storeData(response.data.data[i])
+          if (response.data.data.length) {
+            if (response.data.meta.status === 200) {
+              this.displayed_gifs = []
+              for (let i = 0; i < response.data.data.length; i++) {
+                this.storeData(response.data.data[i])
+              }
+              this.index = 0
+              this.setDisplayedGif()
+            } else if (response.data.meta.status === 429) {
+              this.too_many_requests = true
+            } else {
+              this.error_message = 'There was an error with that request.'
+              console.log('ERROR: Request to giphy api returned code ' + response.data.meta.status)
             }
-            this.index = 0
-            this.setDisplayedGif()
-          } else if (response.data.meta.status === 429) {
-            this.too_many_requests = true
           } else {
-            this.error_message = 'There was an error with that request.'
-            console.log('ERROR: Request to giphy api returned code ' + response.data.meta.status)
+            // response returned an empty array, show message and hide gif container
+            this.hide_gif_container = true
+            this.error_message = 'No gifs returned in search for ' + this.search_string
           }
+          
         
         this.loading = false
       });
