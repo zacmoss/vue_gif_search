@@ -186,7 +186,7 @@ export default {
       this.setDisplayedGif()
     },
     copyToClipboard: function () {
-      if (navigator.clipboard.writeText(this.display_gif.images.original_mp4.mp4)) {
+      if (navigator.clipboard.writeText(this.display_gif.embed_url)) {
         this.show_copied_message = true
       }
     }
